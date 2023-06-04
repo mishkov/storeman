@@ -1,9 +1,12 @@
 import 'dart:developer';
+import 'dart:ffi';
 import 'dart:io' as io;
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'directory_utility_bindings.dart';
 
 void main() {
   runApp(const MainApp());
@@ -19,6 +22,16 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   final _directoryPathController = TextEditingController();
   List<ResultItem> _result = [];
+  DirectoryUtility? lib;
+  SizeCalculator? utility;
+
+  @override
+  void initState() {
+    super.initState();
+
+    lib = DirectoryUtility(DynamicLibrary.open('libswiftapi.dylib'));
+    utility = SizeCalculator.new1(lib!);
+  }
 
   List<ResultItem> _getSizesOfEntitiesIn(io.Directory directory) {
     final List<ResultItem> result = [];
@@ -29,16 +42,8 @@ class _MainAppState extends State<MainApp> {
         int totalSize = 0;
 
         if (entity is io.Directory) {
-          final innerEntities =
-              entity.listSync(recursive: true, followLinks: false);
-
-          for (final innerEntity in innerEntities) {
-            if (innerEntity is io.File) {
-              totalSize += innerEntity.lengthSync();
-            } else if (innerEntity is! io.Directory) {
-              log('${entity.path} is not io.File and is not io.Folder');
-            }
-          }
+          totalSize = utility!
+              .getFolderSizeOnDiskInBytesWithPath_(NSString(lib!, entity.path));
         } else if (entity is io.File) {
           totalSize = entity.lengthSync();
         } else {

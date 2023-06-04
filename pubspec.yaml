@@ -14,6 +14,22 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  ffigen: ^8.0.2
 
 flutter:
   uses-material-design: true
+
+ffigen:
+  name: DirectoryUtility
+  description: Bindings for DirectoryUtility.
+  language: objc
+  output: 'lib/directory_utility_bindings.dart'
+  exclude-all-by-default: true
+  objc-interfaces:
+    include:
+      - 'SizeCalculator'
+    module:
+      'SizeCalculator': 'swift_module'
+  headers:
+    entry-points:
+      - '/Users/mishkov/Projects/StoremanMacOS/StoremanMacOS/swift_api.h'
