@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io' as io;
 
@@ -27,7 +28,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _directoryPathController = TextEditingController(
-    text: '/Users/mishkov/Library/Developer/CoreSimulator/Devices/',
+    text: '/Users/mishkov/Library/',
   );
   List<ResultItem> _result = [];
 
