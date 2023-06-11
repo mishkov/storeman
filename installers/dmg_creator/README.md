@@ -1,7 +1,14 @@
 # To create dmg file run next command
 
-**Make sure that path to `.app` file exists. If not build the macos app with flutter command**
-
-```
-appdmg ./config.json ./Storeman.dmg
-```
+1. build macos app with
+   ```
+   flutter build macos
+   ```
+2. navigate to directory containing `confing.json` file
+   ```
+   installers/dmg_creator/
+   ```
+3. create `dmg` file via
+   ```
+   appdmg ./config.json ./Storeman.dmg
+   ```
