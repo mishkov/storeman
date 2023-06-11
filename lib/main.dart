@@ -1,26 +1,34 @@
-import 'dart:developer';
 import 'dart:ffi';
 import 'dart:io' as io;
-import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'directory_utility_bindings.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const StoremanApp());
 }
 
-class MainApp extends StatefulWidget {
-  const MainApp({super.key});
+class StoremanApp extends StatelessWidget {
+  const StoremanApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(home: HomeScreen());
+  }
 }
 
-class _MainAppState extends State<MainApp> {
-  final _directoryPathController = TextEditingController();
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final _directoryPathController = TextEditingController(
+    text: '/Users/mishkov/Library/Developer/CoreSimulator/Devices/',
+  );
   List<ResultItem> _result = [];
 
   DirectoryUtility? _lib;
@@ -29,7 +37,6 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    print('the absolute is ${io.Directory.current.absolute}');
     DynamicLibrary.open('libswiftapi.dylib');
     final dynamicLibrary = DynamicLibrary.process();
     _lib = DirectoryUtility(dynamicLibrary);
@@ -68,7 +75,11 @@ class _MainAppState extends State<MainApp> {
         );
       }
     } catch (e) {
-      log('Failed to calculate sizes of files!', error: e);
+      final messenger = ScaffoldMessenger.of(context);
+      messenger.clearSnackBars();
+      messenger.showSnackBar(SnackBar(
+        content: Text('Failed to calculate sizes of files! $e'),
+      ));
     }
 
     return result;
@@ -93,142 +104,135 @@ class _MainAppState extends State<MainApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Builder(builder: (context) {
-        return Scaffold(
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: _directoryPathController,
-                    decoration: const InputDecoration(
-                      labelText: 'Path to directory',
-                      enabledBorder: OutlineInputBorder(),
-                      errorBorder: OutlineInputBorder(),
-                      focusedBorder: OutlineInputBorder(),
-                      disabledBorder: OutlineInputBorder(),
-                      focusedErrorBorder: OutlineInputBorder(),
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextButton(
-                    onPressed: () {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final directory =
-                          io.Directory(_directoryPathController.text);
-                      if (!directory.existsSync()) {
-                        messenger.removeCurrentSnackBar();
-                        messenger.showSnackBar(
-                          const SnackBar(
-                            content: Text('Directory is not found!'),
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _directoryPathController,
+                decoration: const InputDecoration(
+                  labelText: 'Path to directory',
+                  enabledBorder: OutlineInputBorder(),
+                  errorBorder: OutlineInputBorder(),
+                  focusedBorder: OutlineInputBorder(),
+                  disabledBorder: OutlineInputBorder(),
+                  focusedErrorBorder: OutlineInputBorder(),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final directory = io.Directory(_directoryPathController.text);
+                  if (!directory.existsSync()) {
+                    messenger.removeCurrentSnackBar();
+                    messenger.showSnackBar(
+                      const SnackBar(
+                        content: Text('Directory is not found!'),
+                      ),
+                    );
+
+                    return;
+                  }
+                  setState(() {
+                    _result = _getSizesOfEntitiesIn(directory);
+                    _result.sort(
+                      (a, b) {
+                        if (a.entirySizeIsBytes == b.entirySizeIsBytes) {
+                          return 0;
+                        } else if (a.entirySizeIsBytes > b.entirySizeIsBytes) {
+                          return -1;
+                        } else {
+                          return 1;
+                        }
+                      },
+                    );
+                  });
+
+                  // showDialog(
+                  //   context: context,
+                  //   builder: (context) {
+                  //     return Padding(
+                  //       padding: const EdgeInsets.all(24.0),
+                  //       child: Container(
+                  //         decoration: BoxDecoration(
+                  //           color:
+                  //               Theme.of(context).scaffoldBackgroundColor,
+                  //           borderRadius: BorderRadius.circular(8),
+                  //         ),
+                  //         padding: const EdgeInsets.all(8.0),
+                  //         child: Scaffold(
+                  //           backgroundColor: Colors.transparent,
+                  //           body: Center(
+                  //             child: Column(
+                  //               mainAxisSize: MainAxisSize.min,
+                  //               crossAxisAlignment:
+                  //                   CrossAxisAlignment.center,
+                  //               children: [
+                  //                 const Text('Size of the directory:'),
+                  //                 const SizedBox(height: 16),
+                  //                 Text('$size bytes'),
+                  //                 const SizedBox(height: 16),
+                  //                 Text('${size / 1024} kilo bytes'),
+                  //                 const SizedBox(height: 16),
+                  //                 Text(
+                  //                     '${size / (math.pow(1024, 2))} mega bytes'),
+                  //                 const SizedBox(height: 16),
+                  //                 Text(
+                  //                     '${size / (math.pow(1024, 3))} giga bytes'),
+                  //                 Text('$size bytes'),
+                  //                 const Spacer(),
+                  //                 TextButton(
+                  //                   onPressed: Navigator.of(context).pop,
+                  //                   child: const Text('OK'),
+                  //                 ),
+                  //               ],
+                  //             ),
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     );
+                  //   },
+                  // );
+                },
+                child: const Text('Calculate size'),
+              ),
+              _result.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 100),
+                      itemCount: _result.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(_result[index].entityName),
+                              ),
+                              Text(
+                                _getPrettyFileSize(
+                                  _result[index].entirySizeIsBytes,
+                                ),
+                              ),
+                            ],
                           ),
                         );
-
-                        return;
-                      }
-                      setState(() {
-                        _result = _getSizesOfEntitiesIn(directory);
-                        _result.sort(
-                          (a, b) {
-                            if (a.entirySizeIsBytes == b.entirySizeIsBytes) {
-                              return 0;
-                            } else if (a.entirySizeIsBytes >
-                                b.entirySizeIsBytes) {
-                              return -1;
-                            } else {
-                              return 1;
-                            }
-                          },
-                        );
-                      });
-
-                      // showDialog(
-                      //   context: context,
-                      //   builder: (context) {
-                      //     return Padding(
-                      //       padding: const EdgeInsets.all(24.0),
-                      //       child: Container(
-                      //         decoration: BoxDecoration(
-                      //           color:
-                      //               Theme.of(context).scaffoldBackgroundColor,
-                      //           borderRadius: BorderRadius.circular(8),
-                      //         ),
-                      //         padding: const EdgeInsets.all(8.0),
-                      //         child: Scaffold(
-                      //           backgroundColor: Colors.transparent,
-                      //           body: Center(
-                      //             child: Column(
-                      //               mainAxisSize: MainAxisSize.min,
-                      //               crossAxisAlignment:
-                      //                   CrossAxisAlignment.center,
-                      //               children: [
-                      //                 const Text('Size of the directory:'),
-                      //                 const SizedBox(height: 16),
-                      //                 Text('$size bytes'),
-                      //                 const SizedBox(height: 16),
-                      //                 Text('${size / 1024} kilo bytes'),
-                      //                 const SizedBox(height: 16),
-                      //                 Text(
-                      //                     '${size / (math.pow(1024, 2))} mega bytes'),
-                      //                 const SizedBox(height: 16),
-                      //                 Text(
-                      //                     '${size / (math.pow(1024, 3))} giga bytes'),
-                      //                 Text('$size bytes'),
-                      //                 const Spacer(),
-                      //                 TextButton(
-                      //                   onPressed: Navigator.of(context).pop,
-                      //                   child: const Text('OK'),
-                      //                 ),
-                      //               ],
-                      //             ),
-                      //           ),
-                      //         ),
-                      //       ),
-                      //     );
-                      //   },
-                      // );
-                    },
-                    child: const Text('Calculate size'),
-                  ),
-                  _result.isNotEmpty
-                      ? ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 100),
-                          itemCount: _result.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(_result[index].entityName),
-                                  ),
-                                  Text(
-                                    _getPrettyFileSize(
-                                      _result[index].entirySizeIsBytes,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        )
-                      : const Center(
-                          child: Text('Результатов нет'),
-                        ),
-                ],
-              ),
-            ),
+                      },
+                    )
+                  : const Center(
+                      child: Text('Результатов нет'),
+                    ),
+            ],
           ),
-        );
-      }),
+        ),
+      ),
     );
   }
 }
