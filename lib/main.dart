@@ -22,15 +22,18 @@ class MainApp extends StatefulWidget {
 class _MainAppState extends State<MainApp> {
   final _directoryPathController = TextEditingController();
   List<ResultItem> _result = [];
-  DirectoryUtility? lib;
-  SizeCalculator? utility;
+
+  DirectoryUtility? _lib;
+  SizeCalculator? _utility;
 
   @override
   void initState() {
     super.initState();
-
-    lib = DirectoryUtility(DynamicLibrary.open('libswiftapi.dylib'));
-    utility = SizeCalculator.new1(lib!);
+    print('the absolute is ${io.Directory.current.absolute}');
+    DynamicLibrary.open('libswiftapi.dylib');
+    final dynamicLibrary = DynamicLibrary.process();
+    _lib = DirectoryUtility(dynamicLibrary);
+    _utility = SizeCalculator.new1(_lib!);
   }
 
   List<ResultItem> _getSizesOfEntitiesIn(io.Directory directory) {
@@ -42,8 +45,8 @@ class _MainAppState extends State<MainApp> {
         int totalSize = 0;
 
         if (entity is io.Directory) {
-          totalSize = utility!
-              .getFolderSizeOnDiskInBytesWithPath_(NSString(lib!, entity.path));
+          totalSize = _utility!.getFolderSizeOnDiskInBytesWithPath_(
+              NSString(_lib!, entity.path));
         } else if (entity is io.File) {
           totalSize = entity.lengthSync();
         } else {
