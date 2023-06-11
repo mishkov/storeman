@@ -27,9 +27,7 @@
 		33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F22044A3C60003C045 /* Assets.xcassets */; };
 		33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 33CC10F42044A3C60003C045 /* MainMenu.xib */; };
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
-		3F843BAA2A2CD97800B2B339 /* dylibs in Resources */ = {isa = PBXBuildFile; fileRef = 3F843BA92A2CD97800B2B339 /* dylibs */; };
-		3F843BAC2A35BF5800B2B339 /* libswiftapi.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3F843BAB2A35BF5800B2B339 /* libswiftapi.dylib */; };
-		3F843BAD2A35C47A00B2B339 /* libswiftapi.dylib in Bundle Framework */ = {isa = PBXBuildFile; fileRef = 3F843BAB2A35BF5800B2B339 /* libswiftapi.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3F843BAF2A35CDC200B2B339 /* libswiftapi.dylib in Bundle Framework */ = {isa = PBXBuildFile; fileRef = 3F843BAE2A35CDC200B2B339 /* libswiftapi.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		C04E4BAA63781745560FC2FF /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4963927D660CA8E29AA925AC /* Pods_RunnerTests.framework */; };
 		D7C9685C5D2272A7F84781C8 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1FC67F322B943037A9905D39 /* Pods_Runner.framework */; };
 /* End PBXBuildFile section */
@@ -58,7 +56,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3F843BAD2A35C47A00B2B339 /* libswiftapi.dylib in Bundle Framework */,
+				3F843BAF2A35CDC200B2B339 /* libswiftapi.dylib in Bundle Framework */,
 			);
 			name = "Bundle Framework";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -84,8 +82,7 @@
 		33E51913231747F40026EE4D /* DebugProfile.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DebugProfile.entitlements; sourceTree = "<group>"; };
 		33E51914231749380026EE4D /* Release.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = Release.entitlements; sourceTree = "<group>"; };
 		33E5194F232828860026EE4D /* AppInfo.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = AppInfo.xcconfig; sourceTree = "<group>"; };
-		3F843BA92A2CD97800B2B339 /* dylibs */ = {isa = PBXFileReference; lastKnownFileType = folder; name = dylibs; path = ../dylibs; sourceTree = "<group>"; };
-		3F843BAB2A35BF5800B2B339 /* libswiftapi.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libswiftapi.dylib; sourceTree = "<group>"; };
+		3F843BAE2A35CDC200B2B339 /* libswiftapi.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libswiftapi.dylib; path = /Users/mishkov/Projects/storeman/macos/libswiftapi.dylib; sourceTree = "<absolute>"; };
 		4963927D660CA8E29AA925AC /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		52BFE2FE2A08D5CD72A631BF /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -110,7 +107,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D7C9685C5D2272A7F84781C8 /* Pods_Runner.framework in Frameworks */,
-				3F843BAC2A35BF5800B2B339 /* libswiftapi.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,7 +135,7 @@
 		33CC10E42044A3C60003C045 = {
 			isa = PBXGroup;
 			children = (
-				3F843BA92A2CD97800B2B339 /* dylibs */,
+				3F843BAE2A35CDC200B2B339 /* libswiftapi.dylib */,
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
@@ -209,7 +205,6 @@
 		D73912EC22F37F3D000D13A0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3F843BAB2A35BF5800B2B339 /* libswiftapi.dylib */,
 				1FC67F322B943037A9905D39 /* Pods_Runner.framework */,
 				4963927D660CA8E29AA925AC /* Pods_RunnerTests.framework */,
 			);
@@ -320,7 +315,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3F843BAA2A2CD97800B2B339 /* dylibs in Resources */,
 				33CC10F32044A3C60003C045 /* Assets.xcassets in Resources */,
 				33CC10F62044A3C60003C045 /* MainMenu.xib in Resources */,
 			);
