@@ -194,7 +194,7 @@ class _MultiLevelPieChartPainter extends CustomPainter {
   bool shouldRepaint(_MultiLevelPieChartPainter oldDelegate) => true;
 }
 
-typedef NeedToProceedCallback = bool Function(
+typedef _NeedToProceedCallback = bool Function(
   PieChartSectionData category,
   _MultiLevelPieChartLayout layout,
 );
@@ -302,7 +302,7 @@ class _MultiLevelPieChartLayoutBuilder {
 
   void biuldLayoutForEachUntil({
     required Size size,
-    required NeedToProceedCallback needToProceed,
+    required _NeedToProceedCallback needToProceed,
   }) {
     _biuldLayoutForEachUntil(
       categories: data,
@@ -322,7 +322,7 @@ class _MultiLevelPieChartLayoutBuilder {
     required double sweepAngle,
     required int levelIndex,
     required Size size,
-    required NeedToProceedCallback needToProceed,
+    required _NeedToProceedCallback needToProceed,
   }) {
     for (final category in categories) {
       final subcategoriesTotalValue = categories.fold<double>(
