@@ -7,8 +7,10 @@ environment:
   sdk: '>=3.1.0-155.0.dev <4.0.0'
 
 dependencies:
+  fl_chart: ^0.63.0
   flutter:
     sdk: flutter
+  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_test:
