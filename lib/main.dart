@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       }
                     },
                   );
-                  
+
                   _chartData.sort(
                     (a, b) {
                       if (a.value == b.value) {
@@ -180,45 +180,50 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: const Text('Calculate size'),
             ),
-            _result.isNotEmpty
-                ? Expanded(
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 400,
-                          child: MultiLevelPieChart(data: _chartData),
-                        ),
-                        Expanded(
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(bottom: 100),
-                            itemCount: _result.length,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(_result[index].entityName),
-                                    ),
-                                    Text(
-                                      _getPrettyFileSize(
-                                        _result[index].entirySizeIsBytes,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
+            if (_result.isNotEmpty)
+              Expanded(
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 400,
+                      child: MultiLevelPieChart(data: _chartData),
                     ),
-                  )
-                : const Center(
-                    child: Text('Результатов нет'),
+                    Expanded(
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.only(bottom: 100),
+                        itemCount: _result.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(_result[index].entityName),
+                                ),
+                                Text(
+                                  _getPrettyFileSize(
+                                    _result[index].entirySizeIsBytes,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              const Center(
+                child: Text(
+                  'Результатов нет',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
                   ),
+                ),
+              ),
           ],
         ),
       ),
