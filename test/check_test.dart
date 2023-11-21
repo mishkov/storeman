@@ -4,7 +4,5 @@ void main() {
   test('check', () {
     expect(5, 5);
     final someGarbage = 5;
-    final someGarbage2 = 5;
-    final someError =;
   });
 }
