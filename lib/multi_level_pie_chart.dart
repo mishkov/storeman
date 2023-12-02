@@ -47,6 +47,12 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
   }
 
   @override
+  void didUpdateWidget(covariant MultiLevelPieChart oldWidget) {
+    _constructChartLayoutBuilder();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_chartLayoutBuilder == null) {
       return const Placeholder();
