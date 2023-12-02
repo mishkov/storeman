@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:uuid/uuid.dart';
 
 typedef SectionReciver = void Function(PieChartSectionData? section);
@@ -56,8 +57,6 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
       size = renderObject.size;
     }
 
-    const labelOffset = Offset(10, 0);
-
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -94,7 +93,7 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
                   );
 
                   if (section != null) {
-                    widget.onSectionHover?.call(section);
+                    widget.onSectionTap?.call(section);
                   }
                 }
               },
@@ -110,30 +109,131 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
           ),
         ),
         if (_selectedSection != null)
-          Positioned(
-            top: labelOffset.dy + _selectedSectionPosition!.dy,
-            left: labelOffset.dx + _selectedSectionPosition!.dx,
-            child: Container(
-              decoration: BoxDecoration(
-                boxShadow: const [
-                  BoxShadow(
-                    blurRadius: 8.0,
-                    offset: Offset(8.0, 8.0),
-                    color: Colors.black12,
-                  ),
-                ],
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 6.0,
-                vertical: 3.0,
-              ),
-              child: Text(_selectedSection!.title),
+          Positioned.fill(
+            child: FloatingLabel(
+              cursorPosition: _selectedSectionPosition!,
+              child: ChartLabel(title: _selectedSection!.title),
             ),
           ),
       ],
     );
+  }
+}
+
+class ChartLabel extends StatelessWidget {
+  const ChartLabel({
+    super.key,
+    required this.title,
+  });
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 8.0,
+            offset: Offset(8.0, 8.0),
+            color: Colors.black12,
+          ),
+        ],
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6.0,
+        vertical: 3.0,
+      ),
+      child: Text(title),
+    );
+  }
+}
+
+class FloatingLabel extends SingleChildRenderObjectWidget {
+  const FloatingLabel({
+    super.key,
+    required this.cursorPosition,
+    Widget? child,
+  }) : super(child: child);
+
+  final Offset cursorPosition;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return FloatingLabelRenderObject(cursorPosition);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant RenderObject renderObject,
+  ) {
+    (renderObject as FloatingLabelRenderObject).cursorPosition = cursorPosition;
+  }
+}
+
+class FlaotingLabelChild extends ContainerBoxParentData<RenderBox>
+    with ContainerParentDataMixin<RenderBox> {}
+
+class FloatingLabelRenderObject extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, FlaotingLabelChild>,
+        RenderBoxContainerDefaultsMixin<RenderBox, FlaotingLabelChild>,
+        RenderObjectWithChildMixin {
+  Offset _cursorPosition;
+
+  Offset get cursorPosition => _cursorPosition;
+
+  set cursorPosition(Offset value) {
+    _cursorPosition = value;
+    markNeedsLayout();
+  }
+
+  FloatingLabelRenderObject(this._cursorPosition);
+
+  @override
+  void setupParentData(covariant RenderObject child) {
+    child.parentData = FlaotingLabelChild();
+  }
+
+  @override
+  void performLayout() {
+    if (child is RenderBox) {
+      final label = child as RenderBox;
+      final labelConstraints = constraints.loosen();
+      final labelSize = label.getDryLayout(labelConstraints);
+
+      const labelOffset = Offset(10, 0);
+      var labelPosition = cursorPosition + labelOffset;
+
+      final labelRight = labelPosition.dx + labelSize.width;
+
+      if (labelRight >= constraints.maxWidth) {
+        labelPosition = labelPosition.translate(
+          constraints.maxWidth - labelRight,
+          15,
+        );
+      }
+
+      final labelParentData = label.parentData as FlaotingLabelChild;
+      label.layout(labelConstraints, parentUsesSize: true);
+      labelParentData.offset = labelPosition;
+    }
+
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final parentData = child?.parentData as FlaotingLabelChild?;
+    child?.paint(context, offset + (parentData?.offset ?? const Offset(0, 0)));
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
   }
 }
 
