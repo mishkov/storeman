@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:uuid/uuid.dart';
 
 typedef SectionReciver = void Function(PieChartSectionData? section);
@@ -26,6 +27,8 @@ class MultiLevelPieChart extends StatefulWidget {
 
 class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
   PieChartSectionData? _selectedSection;
+  Offset? _selectedSectionPosition;
+
   _MultiLevelPieChartLayoutBuilder? _chartLayoutBuilder;
 
   @override
@@ -44,6 +47,12 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
   }
 
   @override
+  void didUpdateWidget(covariant MultiLevelPieChart oldWidget) {
+    _constructChartLayoutBuilder();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (_chartLayoutBuilder == null) {
       return const Placeholder();
@@ -54,48 +63,183 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
       size = renderObject.size;
     }
 
-    return AspectRatio(
-      aspectRatio: 1.0,
-      child: MouseRegion(
-        onHover: (event) {
-          if (size != null) {
-            final section = _chartLayoutBuilder!.getSectionAt(
-              position: event.localPosition,
-              size: size,
-            );
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AspectRatio(
+          aspectRatio: 1.0,
+          child: MouseRegion(
+            onHover: (event) {
+              if (size != null) {
+                final section = _chartLayoutBuilder!.getSectionAt(
+                  position: event.localPosition,
+                  size: size,
+                );
 
-            setState(() {
-              _selectedSection = section;
-              _constructChartLayoutBuilder();
-            });
+                setState(() {
+                  _selectedSection = section;
+                  if (_selectedSection != null) {
+                    _selectedSectionPosition = event.localPosition;
+                  } else {
+                    _selectedSectionPosition = null;
+                  }
 
-            widget.onSectionHover?.call(section);
-          }
-        },
-        child: GestureDetector(
-          onTapUp: (details) {
-            if (size != null) {
-              final section = _chartLayoutBuilder!.getSectionAt(
-                position: details.localPosition,
-                size: size,
-              );
+                  _constructChartLayoutBuilder();
+                });
 
-              if (section != null) {
                 widget.onSectionHover?.call(section);
               }
-            }
-          },
-          child: CustomPaint(
-            painter: _MultiLevelPieChartPainter(
-              layoutBuilder: _chartLayoutBuilder!,
-            ),
-            child: Center(
-              child: widget.center,
+            },
+            child: GestureDetector(
+              onTapUp: (details) {
+                if (size != null) {
+                  final section = _chartLayoutBuilder!.getSectionAt(
+                    position: details.localPosition,
+                    size: size,
+                  );
+
+                  if (section != null) {
+                    widget.onSectionTap?.call(section);
+                  }
+                }
+              },
+              child: CustomPaint(
+                painter: _MultiLevelPieChartPainter(
+                  layoutBuilder: _chartLayoutBuilder!,
+                ),
+                child: Center(
+                  child: widget.center,
+                ),
+              ),
             ),
           ),
         ),
-      ),
+        if (_selectedSection != null)
+          Positioned.fill(
+            child: FloatingLabel(
+              cursorPosition: _selectedSectionPosition!,
+              child: ChartLabel(title: _selectedSection!.title),
+            ),
+          ),
+      ],
     );
+  }
+}
+
+class ChartLabel extends StatelessWidget {
+  const ChartLabel({
+    super.key,
+    required this.title,
+  });
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: const [
+          BoxShadow(
+            blurRadius: 8.0,
+            offset: Offset(8.0, 8.0),
+            color: Colors.black12,
+          ),
+        ],
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: 6.0,
+        vertical: 3.0,
+      ),
+      child: Text(title),
+    );
+  }
+}
+
+class FloatingLabel extends SingleChildRenderObjectWidget {
+  const FloatingLabel({
+    super.key,
+    required this.cursorPosition,
+    Widget? child,
+  }) : super(child: child);
+
+  final Offset cursorPosition;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return FloatingLabelRenderObject(cursorPosition);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant RenderObject renderObject,
+  ) {
+    (renderObject as FloatingLabelRenderObject).cursorPosition = cursorPosition;
+  }
+}
+
+class FlaotingLabelChild extends ContainerBoxParentData<RenderBox>
+    with ContainerParentDataMixin<RenderBox> {}
+
+class FloatingLabelRenderObject extends RenderBox
+    with
+        ContainerRenderObjectMixin<RenderBox, FlaotingLabelChild>,
+        RenderBoxContainerDefaultsMixin<RenderBox, FlaotingLabelChild>,
+        RenderObjectWithChildMixin {
+  Offset _cursorPosition;
+
+  Offset get cursorPosition => _cursorPosition;
+
+  set cursorPosition(Offset value) {
+    _cursorPosition = value;
+    markNeedsLayout();
+  }
+
+  FloatingLabelRenderObject(this._cursorPosition);
+
+  @override
+  void setupParentData(covariant RenderObject child) {
+    child.parentData = FlaotingLabelChild();
+  }
+
+  @override
+  void performLayout() {
+    if (child is RenderBox) {
+      final label = child as RenderBox;
+      final labelConstraints = constraints.loosen();
+      final labelSize = label.getDryLayout(labelConstraints);
+
+      const labelOffset = Offset(10, 0);
+      var labelPosition = cursorPosition + labelOffset;
+
+      final labelRight = labelPosition.dx + labelSize.width;
+
+      if (labelRight >= constraints.maxWidth) {
+        labelPosition = labelPosition.translate(
+          constraints.maxWidth - labelRight,
+          15,
+        );
+      }
+
+      final labelParentData = label.parentData as FlaotingLabelChild;
+      label.layout(labelConstraints, parentUsesSize: true);
+      labelParentData.offset = labelPosition;
+    }
+
+    size = constraints.biggest;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final parentData = child?.parentData as FlaotingLabelChild?;
+    child?.paint(context, offset + (parentData?.offset ?? const Offset(0, 0)));
+  }
+
+  @override
+  bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
+    return defaultHitTestChildren(result, position: position);
   }
 }
 
