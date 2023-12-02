@@ -26,6 +26,8 @@ class MultiLevelPieChart extends StatefulWidget {
 
 class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
   PieChartSectionData? _selectedSection;
+  Offset? _selectedSectionPosition;
+
   _MultiLevelPieChartLayoutBuilder? _chartLayoutBuilder;
 
   @override
@@ -54,47 +56,83 @@ class _MultiLevelPieChartState extends State<MultiLevelPieChart> {
       size = renderObject.size;
     }
 
-    return AspectRatio(
-      aspectRatio: 1.0,
-      child: MouseRegion(
-        onHover: (event) {
-          if (size != null) {
-            final section = _chartLayoutBuilder!.getSectionAt(
-              position: event.localPosition,
-              size: size,
-            );
+    const labelOffset = Offset(10, 0);
 
-            setState(() {
-              _selectedSection = section;
-              _constructChartLayoutBuilder();
-            });
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        AspectRatio(
+          aspectRatio: 1.0,
+          child: MouseRegion(
+            onHover: (event) {
+              if (size != null) {
+                final section = _chartLayoutBuilder!.getSectionAt(
+                  position: event.localPosition,
+                  size: size,
+                );
 
-            widget.onSectionHover?.call(section);
-          }
-        },
-        child: GestureDetector(
-          onTapUp: (details) {
-            if (size != null) {
-              final section = _chartLayoutBuilder!.getSectionAt(
-                position: details.localPosition,
-                size: size,
-              );
+                setState(() {
+                  _selectedSection = section;
+                  if (_selectedSection != null) {
+                    _selectedSectionPosition = event.localPosition;
+                  } else {
+                    _selectedSectionPosition = null;
+                  }
 
-              if (section != null) {
+                  _constructChartLayoutBuilder();
+                });
+
                 widget.onSectionHover?.call(section);
               }
-            }
-          },
-          child: CustomPaint(
-            painter: _MultiLevelPieChartPainter(
-              layoutBuilder: _chartLayoutBuilder!,
-            ),
-            child: Center(
-              child: widget.center,
+            },
+            child: GestureDetector(
+              onTapUp: (details) {
+                if (size != null) {
+                  final section = _chartLayoutBuilder!.getSectionAt(
+                    position: details.localPosition,
+                    size: size,
+                  );
+
+                  if (section != null) {
+                    widget.onSectionHover?.call(section);
+                  }
+                }
+              },
+              child: CustomPaint(
+                painter: _MultiLevelPieChartPainter(
+                  layoutBuilder: _chartLayoutBuilder!,
+                ),
+                child: Center(
+                  child: widget.center,
+                ),
+              ),
             ),
           ),
         ),
-      ),
+        if (_selectedSection != null)
+          Positioned(
+            top: labelOffset.dy + _selectedSectionPosition!.dy,
+            left: labelOffset.dx + _selectedSectionPosition!.dx,
+            child: Container(
+              decoration: BoxDecoration(
+                boxShadow: const [
+                  BoxShadow(
+                    blurRadius: 8.0,
+                    offset: Offset(8.0, 8.0),
+                    color: Colors.black12,
+                  ),
+                ],
+                color: Theme.of(context).scaffoldBackgroundColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6.0,
+                vertical: 3.0,
+              ),
+              child: Text(_selectedSection!.title),
+            ),
+          ),
+      ],
     );
   }
 }
