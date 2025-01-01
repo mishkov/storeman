@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'dart:ffi';
-
-import 'color_generator.dart';
-import 'directory_utility_bindings.dart';
-import 'multi_level_pie_chart.dart';
-import 'result_item.dart';
-
 import 'dart:io' as io;
+
+import 'package:storeman/color_generator.dart';
+import 'package:storeman/directory_utility_bindings.dart';
+import 'package:storeman/multi_level_pie_chart.dart';
+import 'package:storeman/result_item.dart';
 
 class HomeBloc {
   final _chartDataStreamController =
